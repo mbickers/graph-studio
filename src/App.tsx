@@ -1,26 +1,18 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
 import './App.css';
+import * as Graph from './Graph';
+import * as GraphConstruction from './GraphConstruction';
+
+function GraphEditor() {
+
+}
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [graph, setGraph] = useState(GraphConstruction.complete(5))
+
+  return <>
+    <p>{Graph.toString(graph)}</p>
+  </>;
 }
 
 export default App;
