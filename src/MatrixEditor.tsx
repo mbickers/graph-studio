@@ -1,8 +1,3 @@
+export type MatrixEditorProps = {};
 
-export type MatrixEditorProps = {
-  
-}
-
-export function MatrixEditor() {
-
-}
+export function MatrixEditor() {}
