@@ -9,7 +9,6 @@ type Value =
   { type: 'number', value: Graph.Graph }
 
 export function evaluate(string: string): Graph.Graph {
-
   return Graph.empty
 }
 

@@ -1,29 +1,39 @@
-export type Edge = [string, string]
-
+export type Vertex = string
+export type Edge = [Vertex, Vertex]
 export type Graph = {
-  vertices: Set<string>
+  vertices: Set<Vertex>
   edges: Set<Edge>
+  positions: Map<Vertex, [number, number]>
 }
 
-const copy = ({ vertices, edges }: Graph) => ({ vertices: new Set(vertices), edges: new Set(edges) })
+export const copy = ({ vertices, edges, positions }: Graph) => ({ vertices: new Set(vertices), edges: new Set(edges), positions: new Map(positions) })
 
-export function addEdges(graph: Graph, edges: Edge[]) {
-  const newGraph = copy(graph)
-  edges.forEach(([a, b]) => {
-    newGraph.vertices.add(a)
-    newGraph.vertices.add(b)
-    const edge: Edge = a < b ? [a, b] : [b, a]
-    newGraph.edges.add(edge)
-  })
+export function validGraphOrEmpty({ vertices, edges, positions }: Graph): Graph {
+  for (let vertex of vertices) {
+    if (!positions.get(vertex)) {
+      return empty
+    }
+  }
 
-  return newGraph
+  for (let [a, b] of edges) {
+    if (!vertices.has(a) || !vertices.has(b)) {
+      return empty
+    }
+  }
+
+  return { vertices, edges, positions }
 }
+
+export function edgeToString([a, b]: Edge) {
+  return `(${a}, ${b})`
+}
+
 
 export function toString(graph: Graph) {
   const vertices = [...graph.vertices].join(', ')
-  const edges = [...graph.edges].map(([a, b]) => `(${a}, ${b})`).join(', ')
+  const edges = [...graph.edges].map(edgeToString).join(', ')
 
   return `({${vertices}}, {${edges}})`
 }
 
-export const empty: Graph = { vertices: new Set<string>(), edges: new Set<Edge>() }
+export const empty: Graph = { vertices: new Set(), edges: new Set(), positions: new Map() }
