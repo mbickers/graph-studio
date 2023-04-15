@@ -14,19 +14,20 @@ type DisplayGraphProps = {
 };
 
 function DisplayGraph({
-  graph,
+  graph: unnormalizedGraph,
   highlighted,
   hoverStart,
   hoverEnd,
 }: DisplayGraphProps) {
+  const graph = {
+    ...unnormalizedGraph,
+    positions: GraphConstruction.normalizeLayout(unnormalizedGraph.positions),
+  };
   const size = 100;
   const inset = 10;
   const vertexPosition = (vertex: string) => {
     const [x, y] = graph.positions.get(vertex) as [number, number];
-    return [
-      x * (size / 2 - inset) + size / 2,
-      y * (size / 2 - inset) + size / 2,
-    ];
+    return [x * (size - 2 * inset) + inset, y * (size - 2 * inset) + inset];
   };
   const vertexNodes = [...graph.vertices].map((vertex) => {
     const [cx, cy] = vertexPosition(vertex);
@@ -58,6 +59,7 @@ function DisplayGraph({
       />
     );
   });
+
   return (
     <>
       <p>{Graph.toString(graph)}</p>
@@ -71,12 +73,15 @@ function DisplayGraph({
         {edgeNodes}
         {vertexNodes}
       </svg>
+      <p>{highlighted}</p>
     </>
   );
 }
 
 function App() {
-  const [graph] = useState(() => GraphConstruction.complete(7));
+  const [graph] = useState(() =>
+    GraphConstruction.completeMultipartite([3, 4, 5, 6]),
+  );
   const [highlighted, setHighlighted] = useState(
     () => new Set() as HighlightSelection,
   );

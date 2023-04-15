@@ -16,3 +16,5 @@
 // const test2 = 'K(5) - {1} - {(2, 3), (4, 5)}';
 // const test3 = 'Peterson * P(3)';
 // const test4 = 'L(K(3))';
+
+export {};

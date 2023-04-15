@@ -34,7 +34,7 @@ export function validGraphOrEmpty({
   edges,
   positions,
 }: Graph): Graph {
-  if (![...vertices].every(positions.get)) {
+  if (![...vertices].every((vertex) => positions.get(vertex))) {
     return empty;
   }
 
