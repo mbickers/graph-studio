@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './App.css';
 import * as GraphConstruction from './GraphConstruction';
 import * as Graph from './Graph';
 
@@ -80,7 +79,7 @@ function DisplayGraph({
 
 function App() {
   const [graph] = useState(() =>
-    GraphConstruction.completeMultipartite([3, 4, 5, 6]),
+    GraphConstruction.completeMultipartite([5, 8]),
   );
   const [highlighted, setHighlighted] = useState(
     () => new Set() as HighlightSelection,
