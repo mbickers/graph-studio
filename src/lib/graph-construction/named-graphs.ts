@@ -1,37 +1,6 @@
-import { Edge, Graph, Vertex } from './Graph';
-import { Point, pointOnUnitCircle } from './geometry';
-
-export function normalizeLayout(
-  positions: Map<Vertex, Point>,
-): Map<Vertex, Point> {
-  const [maxX, minX, maxY, minY] = [...positions].reduce(
-    ([maxX_, minX_, maxY_, minY_], [_, [x, y]]) => [
-      Math.max(maxX_, x),
-      Math.min(minX_, x),
-      Math.max(maxY_, y),
-      Math.min(minY_, y),
-    ],
-    [Number.MIN_VALUE, Number.MAX_VALUE, Number.MIN_VALUE, Number.MAX_VALUE],
-  );
-
-  const updatedPositions = [...positions].map(
-    ([vertex, [x, y]]): [Vertex, Point] => [
-      vertex,
-      [(x - minX) / (maxX - minX), (y - minY) / (maxY - minY)],
-    ],
-  );
-
-  return new Map(updatedPositions);
-}
-
-function circularLayout(vertices: Vertex[]): Map<Vertex, Point> {
-  const position = (vertex: Vertex, index: number): [Vertex, Point] => [
-    vertex,
-    pointOnUnitCircle((2 * Math.PI * index) / vertices.length + Math.PI),
-  ];
-
-  return normalizeLayout(new Map(vertices.map(position)));
-}
+import { Edge, Graph, Vertex } from '../graph';
+import { pointOnUnitCircle } from '../graph-layout/geometry';
+import { circularLayout } from '../graph-layout/layouts';
 
 export function complete(n: number): Graph {
   const edges = new Set<[string, string]>();

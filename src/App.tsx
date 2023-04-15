@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import * as GraphConstruction from './GraphConstruction';
-import * as Graph from './Graph';
+import * as GraphConstruction from './lib/graph-construction/named-graphs';
+import * as Graph from './lib/graph';
+import { normalizeLayout } from './lib/graph-layout/layouts';
 
 type Element = Graph.Vertex | Graph.Edge;
 type HighlightSelection = Set<Element>;
@@ -20,7 +21,7 @@ function DisplayGraph({
 }: DisplayGraphProps) {
   const graph = {
     ...unnormalizedGraph,
-    positions: GraphConstruction.normalizeLayout(unnormalizedGraph.positions),
+    positions: normalizeLayout(unnormalizedGraph.positions),
   };
   const size = 100;
   const inset = 10;
