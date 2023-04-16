@@ -1,34 +1,54 @@
-import { Vertex } from '../graph';
-import { Point, pointOnUnitCircle } from './geometry';
+import { range } from '../utils';
+import {
+  Point,
+  boundingRectangle,
+  pointOnUnitCircle,
+  transformForRectanglePreservingAspectRatio,
+} from './geometry';
 
 export function normalizeLayout(
-  positions: Map<Vertex, Point>,
-): Map<Vertex, Point> {
-  const [maxX, minX, maxY, minY] = [...positions].reduce(
-    ([maxX_, minX_, maxY_, minY_], [_, [x, y]]) => [
-      Math.max(maxX_, x),
-      Math.min(minX_, x),
-      Math.max(maxY_, y),
-      Math.min(minY_, y),
-    ],
-    [Number.MIN_VALUE, Number.MAX_VALUE, Number.MIN_VALUE, Number.MAX_VALUE],
+  positions: Point[],
+  newCenter: Point = [0, 0],
+  maxDimension = 2,
+): Point[] {
+  const currentBoundingRectangle = boundingRectangle(positions);
+  const transform = transformForRectanglePreservingAspectRatio(
+    currentBoundingRectangle,
+    newCenter,
+    maxDimension,
   );
-
-  const updatedPositions = [...positions].map(
-    ([vertex, [x, y]]): [Vertex, Point] => [
-      vertex,
-      [(x - minX) / (maxX - minX), (y - minY) / (maxY - minY)],
-    ],
-  );
-
-  return new Map(updatedPositions);
+  return positions.map(transform);
 }
 
-export function circularLayout(vertices: Vertex[]): Map<Vertex, Point> {
-  const position = (vertex: Vertex, index: number): [Vertex, Point] => [
-    vertex,
-    pointOnUnitCircle((2 * Math.PI * index) / vertices.length + Math.PI),
-  ];
+export function circularLayout(n: number): Point[] {
+  return range(n).map((index) =>
+    pointOnUnitCircle((2 * Math.PI * index) / n + Math.PI),
+  );
+}
 
-  return normalizeLayout(new Map(vertices.map(position)));
+export function circularLayoutPartitioned(
+  partitionSizes: number[],
+  arcRatio = 2,
+): Point[] {
+  const previousArcsWithinPartitions = partitionSizes.reduce(
+    (sizes, size) => [...sizes, sizes.at(-1)! + size],
+    [0],
+  );
+  const vertexArc =
+    (2 * Math.PI) /
+    (previousArcsWithinPartitions.at(-1)! + arcRatio * partitionSizes.length);
+
+  // Offset angles so that first partition is centered at angle 0
+  const angleOffset = (-vertexArc * (partitionSizes[0] - 1)) / 2 + Math.PI;
+
+  return partitionSizes.flatMap((partitionSize, partitionIndex) => {
+    const baseAngle =
+      angleOffset +
+      vertexArc * previousArcsWithinPartitions[partitionIndex] +
+      vertexArc * arcRatio * partitionIndex;
+
+    return range(partitionSize).map((vertexIndex) =>
+      pointOnUnitCircle(baseAngle + vertexIndex * vertexArc),
+    );
+  });
 }

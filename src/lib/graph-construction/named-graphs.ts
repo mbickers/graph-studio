@@ -1,91 +1,45 @@
-import { Edge, Graph, Vertex } from '../graph';
-import { pointOnUnitCircle } from '../graph-layout/geometry';
-import { circularLayout } from '../graph-layout/layouts';
+import { Edge, Graph } from '../graph';
+import {
+  circularLayout,
+  circularLayoutPartitioned,
+} from '../graph-layout/layouts';
+import { range } from '../utils';
 
 export function complete(n: number): Graph {
-  const edges = new Set<[string, string]>();
-  for (let a = 1; a < n; a += 1) {
-    for (let b = a + 1; b <= n; b += 1) {
-      edges.add([String(a), String(b)]);
-    }
-  }
-
-  const vertices = [];
-  for (let a = 1; a <= n; a += 1) {
-    vertices.push(`${a}`);
-  }
-
+  const edges = range(n).flatMap((v1) =>
+    range(v1 - 1).map((v2) => [v1, v2] as Edge),
+  );
   return {
-    vertices: new Set(vertices),
+    numVertices: n,
     edges,
-    positions: circularLayout(vertices),
+    positions: circularLayout(n),
   };
 }
 
 export function cycle(n: number): Graph {
-  const edges = new Set<[string, string]>();
-  const vertices = [];
-  for (let a = 1; a <= n; a += 1) {
-    vertices.push(`${a}`);
-    const next = `${(a % n) + 1}`;
-    edges.add([`${a}`, next]);
-  }
-
+  const edges = range(n).map((v) => [v, (v + 1) % n] as Edge);
   return {
-    vertices: new Set(vertices),
+    numVertices: n,
     edges,
-    positions: circularLayout(vertices),
+    positions: circularLayout(n),
   };
 }
 
 export function completeMultipartite(partitions: number[]): Graph {
-  const vertices = new Set<Vertex>();
-  const edges = new Set<Edge>();
-  const positions = new Map();
-
-  // Ratio between arc between partitions and arc between vertices within a partition.
-  const arcRatio = 2;
-
-  const previousInterPartitionArcs = partitions.reduce(
-    (sizes, current) => [...sizes, current + sizes.at(-1)! - 1],
-    [0],
-  );
-  const vertexArc =
-    (2 * Math.PI) /
-    (previousInterPartitionArcs.at(-1)! + arcRatio * partitions.length);
-
-  // Offset angles so that first partition is centered at angle 0
-  const angleOffset = (-vertexArc * (partitions[0] - 1)) / 2 + Math.PI;
-
-  partitions.forEach((partitionSize, partitionIndex) => {
-    const baseAngle =
-      angleOffset +
-      vertexArc * previousInterPartitionArcs[partitionIndex] +
-      vertexArc * arcRatio * partitionIndex;
-
-    for (let vertexIndex = 0; vertexIndex < partitionSize; vertexIndex += 1) {
-      const vertex = `${partitionIndex + 1}.${vertexIndex + 1}`;
-      vertices.add(vertex);
-
-      const angle = baseAngle + vertexIndex * vertexArc;
-      positions.set(vertex, pointOnUnitCircle(angle));
-
-      partitions
-        .slice(0, partitionIndex)
-        .forEach((adjacentPartitionSize, adjacentPartitionIndex) => {
-          for (
-            let adjacentVertexIndex = 0;
-            adjacentVertexIndex < adjacentPartitionSize;
-            adjacentVertexIndex += 1
-          ) {
-            const adjacentVertex = `${adjacentPartitionIndex + 1}.${
-              adjacentVertexIndex + 1
-            }`;
-            edges.add([adjacentVertex, vertex]);
-          }
-        });
-    }
+  const edges = partitions.flatMap((partitionSize, partitionIndex) => {
+    const verticesPrecedingPartition = partitions
+      .slice(0, partitionIndex)
+      .reduce((sum, current) => sum + current, 0);
+    return range(partitionSize).flatMap((vertex) =>
+      range(verticesPrecedingPartition).map(
+        (adjacentVertex) => [vertex, adjacentVertex] as Edge,
+      ),
+    );
   });
 
-  return { vertices, edges, positions };
+  return {
+    numVertices: partitions.reduce((sum, current) => sum + current, 0),
+    edges,
+    positions: circularLayoutPartitioned(partitions),
+  };
 }

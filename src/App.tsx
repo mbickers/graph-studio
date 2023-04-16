@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import * as GraphConstruction from './lib/graph-construction/named-graphs';
 import * as Graph from './lib/graph';
 import { normalizeLayout } from './lib/graph-layout/layouts';
+import { range } from './lib/utils';
 
 type Element = Graph.Vertex | Graph.Edge;
 type HighlightSelection = Set<Element>;
@@ -19,18 +20,18 @@ function DisplayGraph({
   hoverStart,
   hoverEnd,
 }: DisplayGraphProps) {
-  const graph = {
-    ...unnormalizedGraph,
-    positions: normalizeLayout(unnormalizedGraph.positions),
-  };
   const size = 100;
   const inset = 10;
-  const vertexPosition = (vertex: string) => {
-    const [x, y] = graph.positions.get(vertex) as [number, number];
-    return [x * (size - 2 * inset) + inset, y * (size - 2 * inset) + inset];
+  const graph = {
+    ...unnormalizedGraph,
+    positions: normalizeLayout(
+      unnormalizedGraph.positions,
+      [size / 2, size / 2],
+      size - 2 * inset,
+    ),
   };
-  const vertexNodes = [...graph.vertices].map((vertex) => {
-    const [cx, cy] = vertexPosition(vertex);
+  const vertexNodes = range(graph.numVertices).map((vertex) => {
+    const [cx, cy] = graph.positions[vertex];
     return (
       <circle
         key={vertex}
@@ -45,7 +46,7 @@ function DisplayGraph({
   });
 
   const edgeNodes = [...graph.edges].map((edge) => {
-    const [[x1, y1], [x2, y2]] = edge.map(vertexPosition);
+    const [[x1, y1], [x2, y2]] = edge.map((vertex) => graph.positions[vertex]);
     return (
       <line
         key={Graph.edgeToString(edge)}
