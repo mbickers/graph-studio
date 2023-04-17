@@ -21,26 +21,37 @@ export function lerp(point0: Point, point1: Point, t: number): Point {
   return add(point0, multiply(subtract(point1, point0), t));
 }
 
-export function transformForRectanglePreservingAspectRatio(
+export function squaredDistance(point0: Point, point1: Point): number {
+  const [dx, dy] = subtract(point1, point0);
+  return dx * dx + dy * dy;
+}
+
+export function rectangleCenterAndDimensions(rectangle: Rectangle) {
+  const dimensions = subtract(rectangle.upperRight, rectangle.lowerLeft);
+  const center = add(rectangle.lowerLeft, multiply(dimensions, 0.5));
+  return {
+    center,
+    dimensions,
+  };
+}
+
+export function transformToContainRectangle(
   original: Rectangle,
-  newCenter: Point,
-  maxDimension: number,
+  container: Rectangle,
 ) {
-  // TODO: add some tests
-  const currentDimensions = subtract(original.upperRight, original.lowerLeft);
-  const currentMaxDimension = Math.max(...currentDimensions);
-  const currentCenter = add(
-    original.lowerLeft,
-    multiply(currentDimensions, 0.5),
+  const { dimensions: originalDimensions, center: originalCenter } =
+    rectangleCenterAndDimensions(original);
+  const { dimensions: containerDimensions, center: containerCenter } =
+    rectangleCenterAndDimensions(container);
+  const scale = Math.min(
+    containerDimensions[0] / originalDimensions[0],
+    containerDimensions[1] / originalDimensions[1],
   );
 
   return (point: Point) => {
-    const relativeToCurrentCenter = multiply(
-      subtract(point, currentCenter),
-      (1 / currentMaxDimension) * 2,
-    );
-
-    return multiply(add(relativeToCurrentCenter, newCenter), maxDimension / 2);
+    const relativeToCurrentCenter = subtract(point, originalCenter);
+    const rescaled = multiply(relativeToCurrentCenter, scale);
+    return add(rescaled, containerCenter);
   };
 }
 

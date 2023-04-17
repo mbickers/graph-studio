@@ -30,9 +30,13 @@ export function completeMultipartite(partitions: number[]): Graph {
     const verticesPrecedingPartition = partitions
       .slice(0, partitionIndex)
       .reduce((sum, current) => sum + current, 0);
-    return range(partitionSize).flatMap((vertex) =>
+    return range(partitionSize).flatMap((vertexIndexInPartition) =>
       range(verticesPrecedingPartition).map(
-        (adjacentVertex) => [vertex, adjacentVertex] as Edge,
+        (adjacentVertex) =>
+          [
+            vertexIndexInPartition + verticesPrecedingPartition,
+            adjacentVertex,
+          ] as Edge,
       ),
     );
   });

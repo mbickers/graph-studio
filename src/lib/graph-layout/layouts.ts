@@ -1,28 +1,27 @@
 import { range } from '../utils';
 import {
   Point,
+  Rectangle,
   boundingRectangle,
   pointOnUnitCircle,
-  transformForRectanglePreservingAspectRatio,
+  transformToContainRectangle,
 } from './geometry';
 
-export function normalizeLayout(
+export function containLayout(
   positions: Point[],
-  newCenter: Point = [0, 0],
-  maxDimension = 2,
+  container: Rectangle,
 ): Point[] {
   const currentBoundingRectangle = boundingRectangle(positions);
-  const transform = transformForRectanglePreservingAspectRatio(
+  const transform = transformToContainRectangle(
     currentBoundingRectangle,
-    newCenter,
-    maxDimension,
+    container,
   );
   return positions.map(transform);
 }
 
 export function circularLayout(n: number): Point[] {
   return range(n).map((index) =>
-    pointOnUnitCircle((2 * Math.PI * index) / n + Math.PI),
+    pointOnUnitCircle((-2 * Math.PI * index) / n + Math.PI),
   );
 }
 
@@ -30,6 +29,9 @@ export function circularLayoutPartitioned(
   partitionSizes: number[],
   arcRatio = 2,
 ): Point[] {
+  if (partitionSizes.length === 1) {
+    return circularLayout(partitionSizes[0]);
+  }
   const previousArcsWithinPartitions = partitionSizes.reduce(
     (sizes, size) => [...sizes, sizes.at(-1)! + size],
     [0],
@@ -39,16 +41,17 @@ export function circularLayoutPartitioned(
     (previousArcsWithinPartitions.at(-1)! + arcRatio * partitionSizes.length);
 
   // Offset angles so that first partition is centered at angle 0
-  const angleOffset = (-vertexArc * (partitionSizes[0] - 1)) / 2 + Math.PI;
+  const firstPartitionArc = vertexArc * Math.max(0, partitionSizes[0] - 1);
+  const angleOffset = firstPartitionArc / 2 + Math.PI;
 
   return partitionSizes.flatMap((partitionSize, partitionIndex) => {
     const baseAngle =
-      angleOffset +
-      vertexArc * previousArcsWithinPartitions[partitionIndex] +
+      angleOffset -
+      vertexArc * previousArcsWithinPartitions[partitionIndex] -
       vertexArc * arcRatio * partitionIndex;
 
     return range(partitionSize).map((vertexIndex) =>
-      pointOnUnitCircle(baseAngle + vertexIndex * vertexArc),
+      pointOnUnitCircle(baseAngle - vertexIndex * vertexArc),
     );
   });
 }

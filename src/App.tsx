@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import * as GraphConstruction from './lib/graph-construction/named-graphs';
 import * as Graph from './lib/graph';
-import { normalizeLayout } from './lib/graph-layout/layouts';
+import { containLayout } from './lib/graph-layout/layouts';
 import { range } from './lib/utils';
 
 type Element = Graph.Vertex | Graph.Edge;
@@ -24,11 +24,10 @@ function DisplayGraph({
   const inset = 10;
   const graph = {
     ...unnormalizedGraph,
-    positions: normalizeLayout(
-      unnormalizedGraph.positions,
-      [size / 2, size / 2],
-      size - 2 * inset,
-    ),
+    positions: containLayout(unnormalizedGraph.positions, {
+      lowerLeft: [inset, inset],
+      upperRight: [size - inset, size - inset],
+    }),
   };
   const vertexNodes = range(graph.numVertices).map((vertex) => {
     const [cx, cy] = graph.positions[vertex];

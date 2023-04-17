@@ -1,14 +1,16 @@
+import { toBeDeepCloseTo } from 'jest-matcher-deep-close-to';
 import {
   Point,
   boundingRectangle,
-  transformForRectanglePreservingAspectRatio,
+  transformToContainRectangle,
 } from './geometry';
 
+expect.extend({ toBeDeepCloseTo });
+
 test('transorm rectangle preserving aspect ratio', () => {
-  const transform = transformForRectanglePreservingAspectRatio(
+  const transform = transformToContainRectangle(
     { lowerLeft: [-5, 1], upperRight: [-1, 3] },
-    [1, -1],
-    2,
+    { lowerLeft: [0, -2], upperRight: [2, 0] },
   );
 
   const original = [
@@ -23,7 +25,7 @@ test('transorm rectangle preserving aspect ratio', () => {
     [0, -0.5],
     [1, -1],
   ] as Point[];
-  expect(original.map(transform)).toEqual(expectedResult);
+  expect(original.map(transform)).toBeDeepCloseTo(expectedResult);
 });
 
 test('find bounding rectangle', () => {
@@ -32,5 +34,5 @@ test('find bounding rectangle', () => {
       [-10, 2],
       [0, -4],
     ]),
-  ).toEqual({ lowerLeft: [-10, -4], upperRight: [0, 2] });
+  ).toBeDeepCloseTo({ lowerLeft: [-10, -4], upperRight: [0, 2] });
 });
