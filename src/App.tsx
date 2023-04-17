@@ -3,6 +3,7 @@ import * as GraphConstruction from './lib/graph-construction/named-graphs';
 import * as Graph from './lib/graph';
 import { containLayout } from './lib/graph-layout/layouts';
 import { range } from './lib/utils';
+import { Point } from './lib/graph-layout/geometry';
 
 type Element = Graph.Vertex | Graph.Edge;
 type HighlightSelection = Set<Element>;
@@ -22,12 +23,14 @@ function DisplayGraph({
 }: DisplayGraphProps) {
   const size = 100;
   const inset = 10;
+  const containedLayout = containLayout(unnormalizedGraph.positions, {
+    lowerLeft: [inset, inset],
+    upperRight: [size - inset, size - inset],
+  });
+  const flippedLayout = containedLayout.map(([x, y]) => [x, size - y] as Point);
   const graph = {
     ...unnormalizedGraph,
-    positions: containLayout(unnormalizedGraph.positions, {
-      lowerLeft: [inset, inset],
-      upperRight: [size - inset, size - inset],
-    }),
+    positions: flippedLayout,
   };
   const vertexNodes = range(graph.numVertices).map((vertex) => {
     const [cx, cy] = graph.positions[vertex];
@@ -79,9 +82,7 @@ function DisplayGraph({
 }
 
 function App() {
-  const [graph] = useState(() =>
-    GraphConstruction.completeMultipartite([5, 8]),
-  );
+  const [graph] = useState(() => GraphConstruction.line(5));
   const [highlighted, setHighlighted] = useState(
     () => new Set() as HighlightSelection,
   );

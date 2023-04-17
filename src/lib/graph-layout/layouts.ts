@@ -19,6 +19,10 @@ export function containLayout(
   return positions.map(transform);
 }
 
+export function linearLayout(n: number): Point[] {
+  return range(n).map((index) => [index, 0] as Point);
+}
+
 export function circularLayout(n: number): Point[] {
   return range(n).map((index) =>
     pointOnUnitCircle((-2 * Math.PI * index) / n + Math.PI),

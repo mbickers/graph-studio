@@ -2,6 +2,7 @@ import { Edge, Graph } from '../graph';
 import {
   circularLayout,
   circularLayoutPartitioned,
+  linearLayout,
 } from '../graph-layout/layouts';
 import { range } from '../utils';
 
@@ -22,6 +23,15 @@ export function cycle(n: number): Graph {
     numVertices: n,
     edges,
     positions: circularLayout(n),
+  };
+}
+
+export function line(n: number): Graph {
+  const edges = range(n - 1).map((v) => [v, v + 1] as Edge);
+  return {
+    numVertices: n,
+    edges,
+    positions: linearLayout(n),
   };
 }
 
