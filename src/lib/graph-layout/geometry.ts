@@ -26,6 +26,22 @@ export function squaredDistance(point0: Point, point1: Point): number {
   return dx * dx + dy * dy;
 }
 
+export function minSquaredDistanceBetweenPoints(points: Point[]) {
+  return points.reduce((best, point, index) => {
+    if (index === 0) {
+      return best;
+    }
+
+    return points
+      .slice(0, index - 1)
+      .reduce(
+        (innerBest, comparisonPoint) =>
+          Math.min(innerBest, squaredDistance(point, comparisonPoint)),
+        best,
+      );
+  }, Number.MAX_VALUE);
+}
+
 export function rectangleCenterAndDimensions(rectangle: Rectangle) {
   const dimensions = subtract(rectangle.upperRight, rectangle.lowerLeft);
   const center = add(rectangle.lowerLeft, multiply(dimensions, 0.5));
