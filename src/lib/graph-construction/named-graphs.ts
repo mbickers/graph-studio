@@ -8,7 +8,7 @@ import { range } from '../utils';
 
 export function complete(n: number): Graph {
   const edges = range(n).flatMap((v1) =>
-    range(v1 - 1).map((v2) => [v1, v2] as Edge),
+    range(n - 1).map((v2) => [v1, v2] as Edge),
   );
   return {
     numVertices: n,

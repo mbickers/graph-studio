@@ -1,3 +1,5 @@
+import { range } from '../utils';
+
 export type Point = [number, number];
 export type Rectangle = { lowerLeft: Point; upperRight: Point };
 
@@ -40,6 +42,21 @@ export function minSquaredDistanceBetweenPoints(points: Point[]) {
         best,
       );
   }, Number.MAX_VALUE);
+}
+
+export function minDistanceAlongAxis(
+  points: Point[],
+  axis: 'horizontal' | 'vertical',
+) {
+  const axisIndex = axis === 'horizontal' ? 0 : 1;
+  const sortedPositionsAlongAxis = points
+    .map((point) => point[axisIndex])
+    .sort();
+  const differences = range(sortedPositionsAlongAxis.length - 1).map(
+    (index) =>
+      sortedPositionsAlongAxis[index + 1] - sortedPositionsAlongAxis[index],
+  );
+  return Math.min(...differences);
 }
 
 export function rectangleCenterAndDimensions(rectangle: Rectangle) {
