@@ -2,6 +2,7 @@ import { toBeDeepCloseTo } from 'jest-matcher-deep-close-to';
 import {
   Point,
   boundingRectangle,
+  minSquaredDistanceBetweenPoints,
   transformToContainRectangle,
 } from './geometry';
 
@@ -35,4 +36,13 @@ test('find bounding rectangle', () => {
       [0, -4],
     ]),
   ).toBeDeepCloseTo({ lowerLeft: [-10, -4], upperRight: [0, 2] });
+});
+
+test('min squared distance between points', () => {
+  expect(
+    minSquaredDistanceBetweenPoints([
+      [0, 0],
+      [0, 1],
+    ]),
+  ).toBeCloseTo(1);
 });

@@ -8,12 +8,14 @@ import {
   multiply,
   pointOnUnitCircle,
   rectangleCenterAndDimensions,
+  rotateAroundOrigin,
+  squaredDistance,
   transformToContainRectangle,
 } from './geometry';
 
 export function containLayout(
   positions: Point[],
-  container: Rectangle,
+  container: Rectangle = { lowerLeft: [-1, -1], upperRight: [1, 1] },
 ): Point[] {
   const currentBoundingRectangle = boundingRectangle(positions);
   const transform = transformToContainRectangle(
@@ -64,37 +66,61 @@ export function circularLayoutPartitioned(
   });
 }
 
-export function orientLayoutAroundOrigin(
-  layout: Point[],
-  direction: 'horizontal' | 'vertical',
-): Point[] {
-  const {
-    dimensions: [width, height],
-  } = rectangleCenterAndDimensions(boundingRectangle(layout));
-  const shouldFlip =
-    direction === 'horizontal' ? height > width : width > height;
-  if (shouldFlip) {
-    return layout.map(([x, y]) => [y, x]);
-  }
-  return layout;
+export function productGridLayout(layout1: Point[], layout2: Point[]) {
+  const flippedLayout1 = layout1.map(([x, y]) => [y, x] as Point);
+  return flippedLayout1.flatMap((point1) =>
+    layout2.map((point2) => add(point1, point2)),
+  );
 }
 
-export function productLayout(layout1: Point[], layout2: Point[]) {
+export function rotateLayoutAroundOrigin(layout: Point[], angle: number) {
+  const normalizedLayout = containLayout(layout);
+  return normalizedLayout.map((point) => rotateAroundOrigin(point, angle));
+}
+
+export function productKeepFirstShapeLayout(
+  layout1: Point[],
+  layout2: Point[],
+) {
   const layoutRatio = 2;
-  const layout2MaxDimension = Math.max(
-    ...rectangleCenterAndDimensions(boundingRectangle(layout2)).dimensions,
-  );
+  const normalizedLayout2 = containLayout(layout2);
+  const layout2MaxDimension = 2;
   const layout1ScaleFactor =
     (layoutRatio * layout2MaxDimension) /
     Math.sqrt(minSquaredDistanceBetweenPoints(layout1));
 
-  return layout1.flatMap((point1) =>
-    layout2.map((point2) => add(multiply(point1, layout1ScaleFactor), point2)),
+  const layout1IsCircular = layout1.reduce(
+    (isCircular, point) => isCircular && squaredDistance(point, [0, 0]) === 1,
+    true,
   );
-  // // Naive grid approach (works for line * line)
-  // const orientedLayout1 = orientLayoutAroundOrigin(layout1, 'vertical');
-  // const orientedLayout2 = orientLayoutAroundOrigin(layout2, 'horizontal');
-  // return orientedLayout1.flatMap((point1) =>
-  //   orientedLayout2.map((point2) => add(point1, point2)),
-  // );
+
+  return layout1.flatMap((point1) => {
+    const rotateAngle = layout1IsCircular
+      ? Math.PI + Math.atan2(point1[1], point1[0])
+      : 0;
+    return normalizedLayout2.map((point2) =>
+      add(
+        multiply(point1, layout1ScaleFactor),
+        rotateAroundOrigin(point2, rotateAngle),
+      ),
+    );
+  });
+}
+
+export function productLayout(layout1: Point[], layout2: Point[]) {
+  const layout1Dimensions = rectangleCenterAndDimensions(
+    boundingRectangle(layout1),
+  ).dimensions;
+  const layout2Dimensions = rectangleCenterAndDimensions(
+    boundingRectangle(layout2),
+  ).dimensions;
+
+  if (
+    layout1Dimensions[0] >= 4 * layout1Dimensions[1] &&
+    layout2Dimensions[0] >= 4 * layout2Dimensions[1]
+  ) {
+    return productGridLayout(layout1, layout2);
+  }
+
+  return productKeepFirstShapeLayout(layout1, layout2);
 }

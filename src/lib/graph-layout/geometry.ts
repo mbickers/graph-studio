@@ -28,6 +28,13 @@ export function squaredDistance(point0: Point, point1: Point): number {
   return dx * dx + dy * dy;
 }
 
+export function rotateAroundOrigin([x, y]: Point, angle: number): Point {
+  return [
+    x * Math.cos(angle) - y * Math.sin(angle),
+    x * Math.sin(angle) + y * Math.cos(angle),
+  ];
+}
+
 export function minSquaredDistanceBetweenPoints(points: Point[]) {
   return points.reduce((best, point, index) => {
     if (index === 0) {
@@ -35,7 +42,7 @@ export function minSquaredDistanceBetweenPoints(points: Point[]) {
     }
 
     return points
-      .slice(0, index - 1)
+      .slice(0, index)
       .reduce(
         (innerBest, comparisonPoint) =>
           Math.min(innerBest, squaredDistance(point, comparisonPoint)),

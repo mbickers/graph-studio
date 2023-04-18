@@ -4,6 +4,7 @@ import * as Graph from './lib/graph';
 import { containLayout } from './lib/graph-layout/layouts';
 import { range } from './lib/utils';
 import { Point } from './lib/graph-layout/geometry';
+import { cartesianProduct } from './lib/graph-construction/binary-operations';
 
 type Element = Graph.Vertex | Graph.Edge;
 type HighlightSelection = Set<Element>;
@@ -82,30 +83,55 @@ function DisplayGraph({
 }
 
 function App() {
-  const [graph] = useState(() => GraphConstruction.line(5));
   const [highlighted, setHighlighted] = useState(
     () => new Set() as HighlightSelection,
   );
 
   return (
-    <DisplayGraph
-      graph={graph}
-      highlighted={highlighted}
-      hoverStart={(element) => {
-        setHighlighted((currentHighlighted) => {
-          const newHighlighted = new Set(currentHighlighted);
-          newHighlighted.add(element);
-          return newHighlighted;
-        });
-      }}
-      hoverEnd={(element) => {
-        setHighlighted((currentHighlighted) => {
-          const newHighlighted = new Set(currentHighlighted);
-          newHighlighted.delete(element);
-          return newHighlighted;
-        });
-      }}
-    />
+    <>
+      <DisplayGraph
+        graph={cartesianProduct(
+          GraphConstruction.line(5),
+          GraphConstruction.line(4),
+        )}
+        highlighted={highlighted}
+        hoverStart={(element) => {
+          setHighlighted((currentHighlighted) => {
+            const newHighlighted = new Set(currentHighlighted);
+            newHighlighted.add(element);
+            return newHighlighted;
+          });
+        }}
+        hoverEnd={(element) => {
+          setHighlighted((currentHighlighted) => {
+            const newHighlighted = new Set(currentHighlighted);
+            newHighlighted.delete(element);
+            return newHighlighted;
+          });
+        }}
+      />
+      <DisplayGraph
+        graph={cartesianProduct(
+          GraphConstruction.cycle(4),
+          GraphConstruction.complete(5),
+        )}
+        highlighted={highlighted}
+        hoverStart={(element) => {
+          setHighlighted((currentHighlighted) => {
+            const newHighlighted = new Set(currentHighlighted);
+            newHighlighted.add(element);
+            return newHighlighted;
+          });
+        }}
+        hoverEnd={(element) => {
+          setHighlighted((currentHighlighted) => {
+            const newHighlighted = new Set(currentHighlighted);
+            newHighlighted.delete(element);
+            return newHighlighted;
+          });
+        }}
+      />
+    </>
   );
 }
 
