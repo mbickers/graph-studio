@@ -1,10 +1,5 @@
 import { toBeDeepCloseTo } from 'jest-matcher-deep-close-to';
-import {
-  circularLayout,
-  circularLayoutPartitioned,
-  linearLayout,
-  productLayout,
-} from './layouts';
+import { circularLayout, circularLayoutPartitioned } from './layouts';
 import { pointOnUnitCircle, squaredDistance } from './geometry';
 
 expect.extend({ toBeDeepCloseTo });
